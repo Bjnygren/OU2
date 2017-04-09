@@ -102,8 +102,10 @@ void test4(){
 	queue_setMemHandler(q1,free);
 	queue_setMemHandler(q2,free);
     int nr_elements = 7;
+    int ref_val = 666;
+    
 	//Assigns values that will make up the non-empty queue. Memory deallocation
-	// is handled by MemHandler. Queues [1, 2, 3] in both queues.
+	// is handled by MemHandler. Queues [1, 2, 3, ...] in both queues.
 	for(int i = 0; i <  nr_elements; i++){
 		int *ini_queue_val = malloc(sizeof ini_queue_val);
 		*ini_queue_val = i+1;
@@ -118,28 +120,35 @@ void test4(){
 	// enqueue(v,(dequeue(q2)). The queues should still have elements 
 	// containing identical values. 
 	int *val = malloc(sizeof val); 
-	*val = 5;
+    *val = ref_val;
 	queue_enqueue(q1,val);
 	queue_dequeue(q1);
 	
 	val = malloc(sizeof val); 
-	*val = 5;
+	*val = ref_val;
 	queue_dequeue(q2);
 	queue_enqueue(q2,val);
 	
-	//Checks if the enqueued values are equal in every position after the 
-	// performed operations. Condition in loop probably could've used isEmpty 
-	for(int i = 0; i <  nr_elements; i++){
-		if(*(int*)queue_front(q1) != *(int*)queue_front(q2)){
-			fprintf(stderr,"ERROR! Values are not queued in a correct way."
+    //Checks if the enqueued values are equal in every position after the 
+	// performed operations.  
+    for(int i = 0; i <  nr_elements - 1; i++){
+		if((*(int*)queue_front(q1) != i + 2) || (*(int*)queue_front(q2) != i + 2)){
+            fprintf(stderr,"ERROR! Values are not queued in a correct way."
                 "\n ");
-			queue_free(q1);
-			queue_free(q2);
-			exit(1);
+            queue_free(q1);
+            queue_free(q2);
+            exit(1);
 		}
 		queue_dequeue(q1);
 		queue_dequeue(q2);
 	}
+    if((*(int*)queue_front(q1) != ref_val) || (*(int*)queue_front(q2) != ref_val)){
+        fprintf(stderr,"ERROR! Values are not queued in a correct way."
+            "\n ");
+        queue_free(q1);
+        queue_free(q2);
+        exit(1);
+    }
 	
 	queue_free(q2);
 	queue_free(q1);
@@ -158,13 +167,13 @@ void test5(){
 	queue_setMemHandler(q,free);
 	int *val = malloc(sizeof val);
 	
-	//Perform the operations specified by axiom 5: enqueue an element 
+	// Perform the operations specified by axiom 5: enqueue an element 
 	// and check if the element in the front of the queue is equal to the 
 	// enqueued element.
 	queue_enqueue(q,val);
 	if(queue_front(q) != val){
 		fprintf(stderr, "ERROR! Inspection of the first element of the queue "
-        "does yield the right value.\n");
+        "does not yield the right value.\n");
 		queue_free(q);
 		exit(1);
 	}
@@ -183,47 +192,41 @@ void test5(){
  */
 void test6(){
 	fprintf(stderr,"Test of axiom 6:\n");
-	
-    // q_ref will contain same values as q and act as a reference when 
-    // inspecting q
     queue *q = queue_empty();
-    queue *q_ref = queue_empty();
 	queue_setMemHandler(q,free);
-    queue_setMemHandler(q_ref,free);
 	int *val = malloc(sizeof val);
-    *val = 666;
-	int nr_elements = 3;
-    
-	// Enqueue elements in the queue to create a non-empty queue and assign 
-	// front_q the first element of the queue.
+    int ref_val = 666;
+    int nr_elements = 3;
+    *val = ref_val;
+	    
+	// Create non-empty queue
 	for(int i = 0; i < nr_elements; i++) {
 		int* ini_queue_val = malloc(sizeof ini_queue_val);
         *ini_queue_val = i + 1;
 		queue_enqueue(q, ini_queue_val);
-        
-        ini_queue_val = malloc(sizeof ini_queue_val);
-        *ini_queue_val = i + 1;
-		queue_enqueue(q_ref, ini_queue_val);
 	}
 	
 	// Perform the operations specified by axiom 6: enqueue an element and 
-	// inspect the first value. Every element should be identical except for
-    // the last one. 
-	queue_enqueue(q,val);
+	// inspect the first value. The values in the elements of q should match 
+    // the values they were asigned, in the order that they were assigned. 
+	queue_enqueue(q,val);    
     for(int i = 0; i < nr_elements; i++) {
-        if(*(int*)queue_front(q) != *(int*)queue_front(q_ref)){
+        if(*(int*)queue_front(q) != i + 1){
             fprintf(stderr,"ERROR! Inspection of the first element of the queue "
                 "gives an unexpected value.\n");
             queue_free(q);
-            queue_free(q_ref);
             exit(1);
         }
         queue_dequeue(q);
-        queue_dequeue(q_ref);
     }
+    if(*(int*)queue_front(q) != *val){
+            fprintf(stderr,"ERROR! Inspection of the first element of the queue "
+                "gives an unexpected value.\n");
+            queue_free(q);
+            exit(1);
+        }
 	queue_free(q);
-    queue_free(q_ref);
-	fprintf(stderr,"Ok.\n");
+	fprintf(stderr,"Ok.\n\n");
 } 
 
 int main(){
