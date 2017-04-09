@@ -78,7 +78,7 @@ void test3(){
 	
 	// Checks if queue is empty after the performed operations.
 	if(!queue_isEmpty(q)){
-		fprintf(stderr,"ERROR! Enqueueing and then dequeuing does not produce"
+		fprintf(stderr,"ERROR! One enqueueing and one dequeue does not produce"
 			"the original queue.\n");
 		queue_free(q);
 		exit(1);
@@ -103,7 +103,7 @@ void test4(){
 	queue_setMemHandler(q2,free);
 
 	//Assigns values that will make up the non-empty queue. Memory deallocation
-	// is handled by MemHandler.
+	// is handled by MemHandler. Queues [1, 2, 3] in both queues.
 	for(int i = 0; i < 3; i++){
 		int *ini_queue_val = malloc(sizeof ini_queue_val);
 		*ini_queue_val = i+1;
@@ -115,22 +115,29 @@ void test4(){
 	}
 
 	// Performing the operations stated in axiom 4: dequeue(enqueue(v,q1)) and 
-	// enqueue(v,(dequeue(q2)).
+	// enqueue(v,(dequeue(q2)). This should create two queues with elements 
+	// containing identical values. 
 	int *val = malloc(sizeof val); 
+	*val = 5;
 	queue_enqueue(q1,val);
 	queue_dequeue(q1);
+	
 	val = malloc(sizeof val); 
+	*val = 5;
 	queue_dequeue(q2);
 	queue_enqueue(q2,val);
 	
 	//Checks if the first values of the queues are equal after the 
 	// performed operations. 
-	if(*(int*)queue_front(q1) != *(int*)queue_front(q2)){
-		fprintf(stderr,"ERROR! The values in the first elements of the queues "
-			"does not match.\n ");
-		queue_free(q1);
-		queue_free(q2);
-		exit(1);
+	for(int i = 0; i < 5; i++){
+		if(*(int*)queue_front(q1) != *(int*)queue_front(q2)){
+			fprintf(stderr,"ERROR! The values are not queued correct.\n ");
+			queue_free(q1);
+			queue_free(q2);
+			exit(1);
+		}
+		queue_dequeue(q1);
+		queue_dequeue(q2);
 	}
 	
 	queue_free(q2);
