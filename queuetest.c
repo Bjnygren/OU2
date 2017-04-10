@@ -213,7 +213,7 @@ void test6(){
         }
         queue_dequeue(q);
     }
-    if(*(int*)queue_front(q) != *val){
+    if(*(int*)queue_front(q) != ref_val){
             fprintf(stderr,"ERROR! Inspection of the first element of the queue "
                 "gives an unexpected value.\n");
             queue_free(q);
