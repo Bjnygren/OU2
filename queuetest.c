@@ -63,7 +63,7 @@ void test2(){
  * 				Test axiom 3 of the data type queue. Axiom 3 states that in a 
  * 				correctly implemented queue, given an empty queue, enqueueing 
  * 				an element and then dequeueing an element yields the original 
- * 				empty queue. 
+ * 				empty queue. qweq
  */
 void test3(){
 	fprintf(stderr,"Test of axiom 3:\n");
@@ -78,7 +78,7 @@ void test3(){
 	
 	// Checks if queue is empty after the performed operations.
 	if(!queue_isEmpty(q)){
-		fprintf(stderr,"ERROR! Enqueueing and then dequeuing does not produce"
+		fprintf(stderr,"ERROR! One enqueueing and one dequeue does not produce"
 			"the original queue.\n");
 		queue_free(q);
 		exit(1);
@@ -101,10 +101,12 @@ void test4(){
 	queue *q2 = queue_empty();	
 	queue_setMemHandler(q1,free);
 	queue_setMemHandler(q2,free);
-
+    int nr_elements = 7;
+    int ref_val = 666;
+    
 	//Assigns values that will make up the non-empty queue. Memory deallocation
-	// is handled by MemHandler.
-	for(int i = 0; i < 3; i++){
+	// is handled by MemHandler. Queues [1, 2, 3, ...] in both queues.
+	for(int i = 0; i <  nr_elements; i++){
 		int *ini_queue_val = malloc(sizeof ini_queue_val);
 		*ini_queue_val = i+1;
 		queue_enqueue(q1, ini_queue_val);
@@ -115,22 +117,30 @@ void test4(){
 	}
 
 	// Performing the operations stated in axiom 4: dequeue(enqueue(v,q1)) and 
-	// enqueue(v,(dequeue(q2)).
+	// enqueue(v,(dequeue(q2)). The queues should still have elements 
+	// containing identical values. 
 	int *val = malloc(sizeof val); 
+    *val = ref_val;
 	queue_enqueue(q1,val);
 	queue_dequeue(q1);
+	
 	val = malloc(sizeof val); 
+	*val = ref_val;
 	queue_dequeue(q2);
 	queue_enqueue(q2,val);
 	
-	//Checks if the first values of the queues are equal after the 
-	// performed operations. 
-	if(*(int*)queue_front(q1) != *(int*)queue_front(q2)){
-		fprintf(stderr,"ERROR! The values in the first elements of the queues "
-			"does not match.\n ");
-		queue_free(q1);
-		queue_free(q2);
-		exit(1);
+    //Checks if the enqueued values are equal in every position after the 
+	// performed operations.  
+    for(int i = 0; i <  nr_elements; i++){
+		if(*(int*)queue_front(q1) !=  *(int*)queue_front(q2)){
+            fprintf(stderr,"ERROR! Values are not queued in a correct way."
+                "\n ");
+            queue_free(q1);
+            queue_free(q2);
+            exit(1);
+		}
+		queue_dequeue(q1);
+		queue_dequeue(q2);
 	}
 	
 	queue_free(q2);
@@ -149,14 +159,15 @@ void test5(){
 	queue *q = queue_empty();
 	queue_setMemHandler(q,free);
 	int *val = malloc(sizeof val);
-	
-	//Perform the operations specified by axiom 5: enqueue an element 
-	// and check if the element in the front of the queue is equal to the 
-	// enqueued element.
+	int ref_val = 666;
+	*val = ref_val;
+	// Perform the operations specified by axiom 5: enqueue a value 
+	// and check if the value in the front of the queue is equal to the 
+	// enqueued value.
 	queue_enqueue(q,val);
-	if(queue_front(q) != val){
-		fprintf(stderr, "ERROR! First element in queue does not equal the "
-			"enqueued element.\n");
+	if(*(int*)queue_front(q) != ref_val){
+		fprintf(stderr, "ERROR! Inspection of the first element of the queue "
+        "does not yield the right value.\n");
 		queue_free(q);
 		exit(1);
 	}
@@ -175,30 +186,41 @@ void test5(){
  */
 void test6(){
 	fprintf(stderr,"Test of axiom 6:\n");
-	queue *q = queue_empty();
+    queue *q = queue_empty();
 	queue_setMemHandler(q,free);
 	int *val = malloc(sizeof val);
-	
-	// Enqueue elements in the queue to create a non-empty queue and assign 
-	// front_q the first element of the queue.
-	for(int i = 0; i < 3; i++) {
+    int ref_val = 666;
+    int nr_elements = 3;
+    *val = ref_val;
+	    
+	// Create non-empty queue
+	for(int i = 0; i < nr_elements; i++) {
 		int* ini_queue_val = malloc(sizeof ini_queue_val);
+        *ini_queue_val = i + 1;
 		queue_enqueue(q, ini_queue_val);
 	}
-	int *front_q = queue_front(q);
 	
 	// Perform the operations specified by axiom 6: enqueue an element and 
-	// check if the first element in the queue is same as it was before enqueuing.
-	queue_enqueue(q,val);
-	if(queue_front(q) !=front_q){
-		fprintf(stderr,"ERROR! Enqueuing an element changes value of the first"
-			" element in queue.\n");
-		queue_free(q);
-		exit(1);
-	}
-	
+	// inspect the first value. The values in the elements of q should match 
+    // the values they were asigned, in the order that they were assigned. 
+	queue_enqueue(q,val);    
+    for(int i = 0; i < nr_elements; i++) {
+        if(*(int*)queue_front(q) != i + 1){
+            fprintf(stderr,"ERROR! Inspection of the first element of the queue "
+                "gives an unexpected value.\n");
+            queue_free(q);
+            exit(1);
+        }
+        queue_dequeue(q);
+    }
+    if(*(int*)queue_front(q) != *val){
+            fprintf(stderr,"ERROR! Inspection of the first element of the queue "
+                "gives an unexpected value.\n");
+            queue_free(q);
+            exit(1);
+        }
 	queue_free(q);
-	fprintf(stderr,"Ok.\n");
+	fprintf(stderr,"Ok.\n\n");
 } 
 
 int main(){
